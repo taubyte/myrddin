@@ -1,0 +1,4 @@
+networks:
+{{- range (env "networks")}}
+ - *{{.}}
+{{- end}}

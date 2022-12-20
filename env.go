@@ -26,15 +26,17 @@ type EnvVariable struct {
 type EnvironementFromYaml map[string]interface{}
 
 func (e *Environement) processEnvironementTemplate() (io.Reader, error) {
+	var env_yaml_data []byte
 
 	env_yaml, err := e.store.Open(EnvironementFileName)
-	if err != nil {
-		return nil, fmt.Errorf("Opening template file %s, failed with: %w", EnvironementFileName, err)
-	}
-
-	env_yaml_data, err := ioutil.ReadAll(env_yaml)
-	if err != nil {
-		return nil, fmt.Errorf("Reading template file %s, failed with: %w", EnvironementFileName, err)
+	if err == nil {
+		defer env_yaml.Close()
+		env_yaml_data, err = ioutil.ReadAll(env_yaml)
+		if err != nil {
+			return nil, fmt.Errorf("Reading template file %s, failed with: %w", EnvironementFileName, err)
+		}
+	} else {
+		env_yaml_data = []byte{}
 	}
 
 	tmpl, err := template.New("Env").Funcs(e.funcMap).Parse(string(env_yaml_data))
@@ -84,11 +86,12 @@ func (m *Myrddin) Environement() *Environement {
 	e := &Environement{Myrddin: m}
 
 	e.funcMap = template.FuncMap{
-		"hostname": func() string { h, _ := os.Hostname(); return h },
+		"env": func(n string) string { return os.Getenv(n) },
 	}
 
 	e.data = map[string]interface{}{
-		"version": Version,
+		"version":  Version,
+		"hostname": func() string { h, _ := os.Hostname(); return h }(),
 	}
 
 	return e

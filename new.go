@@ -1,7 +1,6 @@
 package myrddin
 
 import (
-	"os"
 	"text/template"
 
 	"github.com/taubyte/myrddin/env"
@@ -13,8 +12,7 @@ func New(tgt interface{}, options ...Option) (*Myrddin, error) {
 	}
 
 	m.funcMap = template.FuncMap{
-		"hostname": func() string { h, _ := os.Hostname(); return h },
-		"env":      func(name string) interface{} { v, _ := m.env.Get(name); return v },
+		"env": func(name string) interface{} { v, _ := m.env.Get(name); return v },
 	}
 
 	m.data = map[string]interface{}{

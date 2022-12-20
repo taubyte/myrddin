@@ -1,0 +1,4 @@
+version: {{ .ver }}
+name: "test"
+host: {{ env "host" }}
+shell: {{ env "shell" }}

@@ -1,0 +1,5 @@
+net2: &net2
+  name: "net2"
+  addr_range:
+    start: 192.168.2.1
+    end: 192.178.2.100
