@@ -44,7 +44,7 @@ m, err := myrddin.New(
 )
 ```
 
-Then, load the folder containinf your files
+Then, load the folder containing your files
 ```go
 err = m.Load("config")
 ```
