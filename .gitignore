@@ -49,3 +49,5 @@ Thumbs.db
 *.mov
 *.wmv
 
+/example/config/index.yaml
+/example/config/env.yaml

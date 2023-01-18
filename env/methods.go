@@ -13,7 +13,7 @@ func (e *Store) Get(name string) (interface{}, error) {
 	if v, ok := e.kv[name]; ok == true {
 		return v, nil
 	}
-	return nil, fmt.Errorf("Environement variable `%s` does not exist!", name)
+	return nil, fmt.Errorf("Environment variable `%s` does not exist!", name)
 }
 
 func (e *Store) Reset() {

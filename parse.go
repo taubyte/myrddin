@@ -20,7 +20,7 @@ type ParseOption Option
 
 func Define(name string, data interface{}) ParseOption {
 	return func(m *Myrddin) error {
-		return m.Environement().set(EnvVariable{Name: name, Value: data})
+		return m.Environment().set(EnvVariable{Name: name, Value: data})
 	}
 }
 
@@ -30,7 +30,7 @@ func (m *Myrddin) Parse(options ...ParseOption) error {
 		return errors.New("Please load data first")
 	}
 
-	m.Environement().reset()
+	m.Environment().reset()
 
 	for _, opt := range options {
 		err := opt(m)
@@ -39,7 +39,7 @@ func (m *Myrddin) Parse(options ...ParseOption) error {
 		}
 	}
 
-	err := m.Environement().parseEnvironement()
+	err := m.Environment().parseEnvironment()
 	if err != nil {
 		return err
 	}
@@ -73,7 +73,7 @@ func (m *Myrddin) createTemplateEngine() (*template.Template, error) {
 			return nil
 		}
 
-		if path != EnvironementFileName && filepath.Dir(path) == "/" {
+		if path != EnvironmentFileName && filepath.Dir(path) == "/" {
 			return nil
 		}
 
@@ -120,7 +120,6 @@ func (m *Myrddin) createTemplateEngine() (*template.Template, error) {
 }
 
 func (m *Myrddin) parseAllSections() error {
-
 	base_template, err := m.createTemplateEngine()
 	if err != nil {
 		return err
@@ -132,18 +131,38 @@ func (m *Myrddin) parseAllSections() error {
 	}
 	defer outputFile.Close()
 
+	err = m.exportTemplateTo(base_template, outputFile)
+	if err != nil {
+		return err
+	}
+
+	outputFile.Seek(0, 0)
+
+	yamlDec := yaml.NewDecoder(outputFile)
+
+	err = yamlDec.Decode(m.config)
+	if err != io.EOF && err != nil {
+		return fmt.Errorf("Decoding yaml failed with err: %w", err)
+	}
+
+	return nil
+}
+
+func (m *Myrddin) exportTemplateTo(base_template *template.Template, outputFile *os.File) error {
 	_fs := afero.NewIOFS(m.store)
 
-	err = afero.Walk(m.store, "/", func(path string, info fs.FileInfo, err error) error {
-
-		if (info != nil && info.IsDir() == true) || path == EnvironementFileName {
+	return afero.Walk(m.store, "/", func(path string, info fs.FileInfo, err error) error {
+		// Ignore directories || Ignore the Myrddin environment file
+		if (info != nil && info.IsDir() == true) || path == EnvironmentFileName {
 			return nil
 		}
 
+		// Ignore sub-directories
 		if filepath.Dir(path) != "/" {
 			return nil
 		}
 
+		// Ignore files without .yaml or .yml ext
 		if strings.HasSuffix(path, ".yaml") == false && strings.HasSuffix(path, ".yml") == false {
 			return nil
 		}
@@ -167,18 +186,4 @@ func (m *Myrddin) parseAllSections() error {
 		fmt.Fprintln(outputFile)
 		return nil
 	})
-	if err != nil {
-		return err
-	}
-
-	outputFile.Seek(0, 0)
-
-	yamlDec := yaml.NewDecoder(outputFile)
-
-	err = yamlDec.Decode(m.config)
-	if err != io.EOF && err != nil {
-		return fmt.Errorf("Decoding yaml failed with err: %w", err)
-	}
-
-	return nil
 }

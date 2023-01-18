@@ -12,7 +12,7 @@ import (
 	"text/template"
 )
 
-type Environement struct {
+type Environment struct {
 	*Myrddin
 	funcMap template.FuncMap
 	data    map[string]interface{}
@@ -23,49 +23,49 @@ type EnvVariable struct {
 	Value interface{}
 }
 
-type EnvironementFromYaml map[string]interface{}
+type EnvironmentFromYaml map[string]interface{}
 
-func (e *Environement) processEnvironementTemplate() (io.Reader, error) {
+func (e *Environment) processEnvironmentTemplate() (io.Reader, error) {
 	var env_yaml_data []byte
 
-	env_yaml, err := e.store.Open(EnvironementFileName)
+	env_yaml, err := e.store.Open(EnvironmentFileName)
 	if err == nil {
 		defer env_yaml.Close()
 		env_yaml_data, err = ioutil.ReadAll(env_yaml)
 		if err != nil {
-			return nil, fmt.Errorf("Reading template file %s, failed with: %w", EnvironementFileName, err)
+			return nil, fmt.Errorf("Reading template file %s, failed with: %w", EnvironmentFileName, err)
 		}
 	} else {
 		env_yaml_data = []byte{}
 	}
 
-	tmpl, err := template.New("Env").Funcs(e.funcMap).Parse(string(env_yaml_data))
+	_template, err := template.New("Env").Funcs(e.funcMap).Parse(string(env_yaml_data))
 	if err != nil {
-		return nil, fmt.Errorf("Parsing template file %s, failed with: %w", EnvironementFileName, err)
+		return nil, fmt.Errorf("Parsing template file %s, failed with: %w", EnvironmentFileName, err)
 	}
 
 	var buf bytes.Buffer
 
-	err = tmpl.Execute(&buf, e.data)
+	err = _template.Execute(&buf, e.data)
 	if err != nil {
-		return nil, fmt.Errorf("Executing template file %s, failed with: %w", EnvironementFileName, err)
+		return nil, fmt.Errorf("Executing template file %s, failed with: %w", EnvironmentFileName, err)
 	}
 
 	return &buf, nil
 }
 
-func (e *Environement) parseEnvironement() error {
-	yfile, err := e.processEnvironementTemplate()
+func (e *Environment) parseEnvironment() error {
+	yamlFile, err := e.processEnvironmentTemplate()
 	if err != nil {
 		return err
 	}
 
-	byteValue, err := ioutil.ReadAll(yfile)
+	byteValue, err := ioutil.ReadAll(yamlFile)
 	if err != nil {
 		return err
 	}
 
-	_env := make(EnvironementFromYaml)
+	_env := make(EnvironmentFromYaml)
 
 	err = yaml.Unmarshal(byteValue, &_env)
 	if err != nil {
@@ -82,8 +82,8 @@ func (e *Environement) parseEnvironement() error {
 	return nil
 }
 
-func (m *Myrddin) Environement() *Environement {
-	e := &Environement{Myrddin: m}
+func (m *Myrddin) Environment() *Environment {
+	e := &Environment{Myrddin: m}
 
 	e.funcMap = template.FuncMap{
 		"env": func(n string) string { return os.Getenv(n) },
@@ -97,7 +97,7 @@ func (m *Myrddin) Environement() *Environement {
 	return e
 }
 
-func (e *Environement) set(vars ...EnvVariable) error {
+func (e *Environment) set(vars ...EnvVariable) error {
 	var err error = nil
 	for _, v := range vars {
 		err = e.Myrddin.env.Set(v.Name, v.Value)
@@ -108,6 +108,6 @@ func (e *Environement) set(vars ...EnvVariable) error {
 	return err
 }
 
-func (e *Environement) reset() {
+func (e *Environment) reset() {
 	e.Myrddin.env.Reset()
 }

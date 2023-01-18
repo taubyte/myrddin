@@ -26,7 +26,7 @@ func init() {
 
 var (
 	envYamlFixture = map[string]interface{}{
-		"var1": "{{ hostname }}",
+		"var1": "{{ .hostname }}",
 		"var2": 42,
 		"var3": 3.14,
 		"var4": struct {
@@ -78,7 +78,7 @@ type configStruct struct {
 
 func fixture_env_yaml(main_fs afero.Fs) error {
 	// create env yaml file
-	path := EnvironementFileName
+	path := EnvironmentFileName
 	env_yaml, err := main_fs.OpenFile(path, os.O_CREATE|os.O_WRONLY, os.FileMode(0640))
 	if err != nil {
 		return err
@@ -103,15 +103,15 @@ func fixture_env_yaml(main_fs afero.Fs) error {
 }
 
 func fixture_yaml(main_fs afero.Fs, fixture map[string]string) error {
-	for fname, fdata := range fixture {
+	for fixtureName, fixtureData := range fixture {
 		// create env yaml file
-		f_yaml, err := main_fs.OpenFile(fname, os.O_CREATE|os.O_WRONLY, os.FileMode(0640))
+		f_yaml, err := main_fs.OpenFile(fixtureName, os.O_CREATE|os.O_WRONLY, os.FileMode(0640))
 		if err != nil {
 			return err
 		}
 		defer f_yaml.Close()
 
-		_, err = f_yaml.WriteString(fdata)
+		_, err = f_yaml.WriteString(fixtureData)
 		if err != nil {
 			return err
 		}
@@ -162,7 +162,7 @@ func TestLoadingEnvYaml(t *testing.T) {
 
 	m.store = fs
 
-	err = m.Environement().parseEnvironement()
+	err = m.Environment().parseEnvironment()
 	if err != nil {
 		t.Error(err)
 		return
@@ -172,14 +172,14 @@ func TestLoadingEnvYaml(t *testing.T) {
 		v, e1 := m.env.Get("var1")
 		h, e2 := os.Hostname()
 		if e1 != nil || e2 != nil || v.(string) != h {
-			t.Error("Fail to process template: Did not subsitute hostname!")
+			t.Error("Fail to process template: Did not substitute hostname!")
 		}
 	}
 
 	{ // check template data is working
 		v, e1 := m.env.Get("var5")
 		if e1 != nil || v.(string) != Version {
-			t.Error("Fail to process template: Did not subsitute data!")
+			t.Error("Fail to process template: Did not substitute data!")
 		}
 	}
 }
@@ -248,7 +248,7 @@ func TestParseAllYamlWOptions(t *testing.T) {
 
 /*
 image.png.base64
-opensssl base64 -d < image.png.base64 > image.png
+openssl base64 -d < image.png.base64 > image.png
 */
 func TestParseBase64(t *testing.T) {
 	main_fs := afero.NewMemMapFs()
@@ -282,7 +282,7 @@ func TestParseBase64(t *testing.T) {
 }
 
 func TestExampleDirectory(t *testing.T) {
-	main_fs := afero.NewBasePathFs(afero.NewOsFs(), "./examples/improved")
+	main_fs := afero.NewBasePathFs(afero.NewOsFs(), "./example/config")
 
 	fixture_env_yaml(main_fs)
 	f_yaml, err := main_fs.OpenFile("/index.yaml", os.O_CREATE|os.O_WRONLY, os.FileMode(0640))
