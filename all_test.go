@@ -26,7 +26,7 @@ func init() {
 
 var (
 	envYamlFixture = map[string]interface{}{
-		"var1": "{{ hostname }}",
+		"var1": "{{ .hostname }}",
 		"var2": 42,
 		"var3": 3.14,
 		"var4": struct {
@@ -282,7 +282,7 @@ func TestParseBase64(t *testing.T) {
 }
 
 func TestExampleDirectory(t *testing.T) {
-	main_fs := afero.NewBasePathFs(afero.NewOsFs(), "./examples/improved")
+	main_fs := afero.NewBasePathFs(afero.NewOsFs(), "./example/config")
 
 	fixture_env_yaml(main_fs)
 	f_yaml, err := main_fs.OpenFile("/index.yaml", os.O_CREATE|os.O_WRONLY, os.FileMode(0640))
