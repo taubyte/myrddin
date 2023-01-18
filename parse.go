@@ -20,7 +20,7 @@ type ParseOption Option
 
 func Define(name string, data interface{}) ParseOption {
 	return func(m *Myrddin) error {
-		return m.Environement().set(EnvVariable{Name: name, Value: data})
+		return m.Environment().set(EnvVariable{Name: name, Value: data})
 	}
 }
 
@@ -30,7 +30,7 @@ func (m *Myrddin) Parse(options ...ParseOption) error {
 		return errors.New("Please load data first")
 	}
 
-	m.Environement().reset()
+	m.Environment().reset()
 
 	for _, opt := range options {
 		err := opt(m)
@@ -39,7 +39,7 @@ func (m *Myrddin) Parse(options ...ParseOption) error {
 		}
 	}
 
-	err := m.Environement().parseEnvironement()
+	err := m.Environment().parseEnvironment()
 	if err != nil {
 		return err
 	}
@@ -73,7 +73,7 @@ func (m *Myrddin) createTemplateEngine() (*template.Template, error) {
 			return nil
 		}
 
-		if path != EnvironementFileName && filepath.Dir(path) == "/" {
+		if path != EnvironmentFileName && filepath.Dir(path) == "/" {
 			return nil
 		}
 
@@ -153,7 +153,7 @@ func (m *Myrddin) exportTemplateTo(base_template *template.Template, outputFile 
 
 	return afero.Walk(m.store, "/", func(path string, info fs.FileInfo, err error) error {
 		// Ignore directories || Ignore the Myrddin environment file
-		if (info != nil && info.IsDir() == true) || path == EnvironementFileName {
+		if (info != nil && info.IsDir() == true) || path == EnvironmentFileName {
 			return nil
 		}
 

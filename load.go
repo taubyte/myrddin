@@ -77,16 +77,16 @@ func (m *Myrddin) Load(uri string) error {
 }
 
 func (m *Myrddin) loadFile(uri *url.URL) error {
-	osfs := afero.NewOsFs()
+	osFS := afero.NewOsFs()
 	_path := uri.Path
-	isdir, err := afero.IsDir(osfs, _path)
+	isdir, err := afero.IsDir(osFS, _path)
 	if err != nil {
 		return fmt.Errorf("Myrddin loading uri(`%s`) failed with: %w", uri, err)
 	}
 	if isdir == true {
-		m.store = afero.NewReadOnlyFs(afero.NewBasePathFs(osfs, _path))
+		m.store = afero.NewReadOnlyFs(afero.NewBasePathFs(osFS, _path))
 	} else {
-		f, err := osfs.Open(_path)
+		f, err := osFS.Open(_path)
 		if err != nil {
 			return fmt.Errorf("Myrddin opening uri(`%s`) target failed with: %w", uri, err)
 		}
@@ -120,7 +120,7 @@ func (m *Myrddin) loadFile(uri *url.URL) error {
 			}
 			m.store = tarfs.New(tar.NewReader(gzf))
 		default:
-			return fmt.Errorf("Myrddin unsuported uri(`%s`) file type: %s", uri, contentType.Extension)
+			return fmt.Errorf("Myrddin unsupported uri(`%s`) file type: %s", uri, contentType.Extension)
 		}
 	}
 

@@ -1,11 +1,11 @@
 package myrddin
 
 const (
-	EnvironementFileName = "/env.yaml"
+	EnvironmentFileName = "/env.yaml"
 )
 
 var (
-	SpecialFiles = []string{EnvironementFileName}
+	SpecialFiles = []string{EnvironmentFileName}
 )
 
 var ProcessingFileName = func() string {
