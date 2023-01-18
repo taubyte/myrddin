@@ -61,51 +61,9 @@ func (m *Myrddin) Load(uri string) error {
 
 	switch _uri.Scheme {
 	case "file":
-		osfs := afero.NewOsFs()
-		_path := _uri.Path
-		isdir, err := afero.IsDir(osfs, _path)
+		err = m.loadFile(_uri)
 		if err != nil {
-			return fmt.Errorf("Myrddin loading uri(`%s`) failed with: %w", uri, err)
-		}
-		if isdir == true {
-			m.store = afero.NewReadOnlyFs(afero.NewBasePathFs(osfs, _path))
-		} else {
-			f, err := osfs.Open(_path)
-			if err != nil {
-				return fmt.Errorf("Myrddin opening uri(`%s`) target failed with: %w", uri, err)
-			}
-			typeBuff := make([]byte, 512)
-			_, err = f.Read(typeBuff)
-			if err != nil {
-				return fmt.Errorf("Myrddin reading uri(`%s`) target failed with: %w", uri, err)
-			}
-
-			//rewind f
-			f.Seek(0, 0)
-
-			contentType, err := filetype.Match(typeBuff)
-			if err != nil {
-				return fmt.Errorf("Myrddin file type of uri(`%s`) target failed with: %w", uri, err)
-			}
-
-			switch contentType {
-			case matchers.TypeZip:
-				zrc, err := zip.OpenReader(_path)
-				if err != nil {
-					return fmt.Errorf("Myrddin reading uri(`%s`) as zip file failed with: %w", uri, err)
-				}
-				m.store = zipfs.New(&zrc.Reader)
-			case matchers.TypeTar:
-				m.store = tarfs.New(tar.NewReader(f))
-			case matchers.TypeGz:
-				gzf, err := gzip.NewReader(f)
-				if err != nil {
-					return fmt.Errorf("Myrddin reading uri(`%s`) as Gzip file failed with: %w", uri, err)
-				}
-				m.store = tarfs.New(tar.NewReader(gzf))
-			default:
-				return fmt.Errorf("Myrddin unsuported uri(`%s`) file type: %s", _uri, contentType.Extension)
-			}
+			return fmt.Errorf("Myrddin loading file(`%s`) failed with: %w", uri, err)
 		}
 	default:
 		return fmt.Errorf("Myrddin parsing uri(`%s`) error: unknown uri scheme `%s`", _uri, _uri.Scheme)
@@ -113,6 +71,57 @@ func (m *Myrddin) Load(uri string) error {
 
 	if m.store == nil {
 		return errors.New("Failed to open URI")
+	}
+
+	return nil
+}
+
+func (m *Myrddin) loadFile(uri *url.URL) error {
+	osfs := afero.NewOsFs()
+	_path := uri.Path
+	isdir, err := afero.IsDir(osfs, _path)
+	if err != nil {
+		return fmt.Errorf("Myrddin loading uri(`%s`) failed with: %w", uri, err)
+	}
+	if isdir == true {
+		m.store = afero.NewReadOnlyFs(afero.NewBasePathFs(osfs, _path))
+	} else {
+		f, err := osfs.Open(_path)
+		if err != nil {
+			return fmt.Errorf("Myrddin opening uri(`%s`) target failed with: %w", uri, err)
+		}
+		typeBuff := make([]byte, 512)
+		_, err = f.Read(typeBuff)
+		if err != nil {
+			return fmt.Errorf("Myrddin reading uri(`%s`) target failed with: %w", uri, err)
+		}
+
+		//rewind f
+		f.Seek(0, 0)
+
+		contentType, err := filetype.Match(typeBuff)
+		if err != nil {
+			return fmt.Errorf("Myrddin file type of uri(`%s`) target failed with: %w", uri, err)
+		}
+
+		switch contentType {
+		case matchers.TypeZip:
+			zrc, err := zip.OpenReader(_path)
+			if err != nil {
+				return fmt.Errorf("Myrddin reading uri(`%s`) as zip file failed with: %w", uri, err)
+			}
+			m.store = zipfs.New(&zrc.Reader)
+		case matchers.TypeTar:
+			m.store = tarfs.New(tar.NewReader(f))
+		case matchers.TypeGz:
+			gzf, err := gzip.NewReader(f)
+			if err != nil {
+				return fmt.Errorf("Myrddin reading uri(`%s`) as Gzip file failed with: %w", uri, err)
+			}
+			m.store = tarfs.New(tar.NewReader(gzf))
+		default:
+			return fmt.Errorf("Myrddin unsuported uri(`%s`) file type: %s", uri, contentType.Extension)
+		}
 	}
 
 	return nil
