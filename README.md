@@ -1,7 +1,11 @@
 # Myrddin
+
+[![GoDoc](https://godoc.org/github.com/taubyte/myrddin?status.svg)](https://pkg.go.dev/github.com/taubyte/myrddin)
+[![Go Report Card](https://goreportcard.com/badge/taubyte/myrddin)](https://goreportcard.com/report/taubyte/myrddin)
+
 A powerful yaml template engine for golang.
 
-# Usage
+## Usage
 Import
 ```go
 import "github.com/taubyte/myrddin"
@@ -55,7 +59,7 @@ err = m.Parse()
 ```
 
 
-# Example
+## Example
 ```bash
 cd example
 go run .
@@ -80,7 +84,7 @@ networks:
         end: 192.178.2.100
 ```
 
-# Maintainers
+## Maintainers
  - Samy Fodil @samyfodil
  - Sam Stoltenberg @skelouse
  - Aron Jalbuena @arontaubyte
