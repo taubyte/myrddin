@@ -12,7 +12,7 @@ func (m *Myrddin) Reader(filename string) string {
 
 	file, err := m.store.Open("/" + filename)
 	if err != nil {
-		err = fmt.Errorf("open of `%s` failed wtih: %w", filename, err)
+		err = fmt.Errorf("open of `%s` failed with: %w", filename, err)
 		panic(err)
 	}
 
