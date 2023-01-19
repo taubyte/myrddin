@@ -1,7 +1,10 @@
 # Myrddin
 
-[![GoDoc](https://godoc.org/github.com/taubyte/myrddin?status.svg)](https://pkg.go.dev/github.com/taubyte/myrddin)
+[![Release](https://img.shields.io/github/release/taubyte/myrddin.svg)](https://github.com/taubyte/myrddin/releases)
+[![License](https://img.shields.io/github/license/taubyte/myrddin)](LICENSE)
 [![Go Report Card](https://goreportcard.com/badge/taubyte/myrddin)](https://goreportcard.com/report/taubyte/myrddin)
+[![GoDoc](https://godoc.org/github.com/taubyte/myrddin?status.svg)](https://pkg.go.dev/github.com/taubyte/myrddin)
+[![Discord](https://img.shields.io/discord/973677117722202152?color=%235865f2&label=discord)](https://tau.link/discord)
 
 A powerful yaml template engine for golang.
 
